@@ -13,7 +13,7 @@ else
   echo ''
 fi
 yum install -y epel-release
-yum install -y htop net-tools vim wget svn git gcc gcc-c++ initscripts
+yum install -y htop net-tools vim wget svn git gcc gcc-c++ initscripts bzip2
 wget -O install.sh http://download.bt.cn/install/install_6.0.sh && echo y |sh install.sh
 
 # 对api配置文件进行修改 ,打开bt api
@@ -23,6 +23,8 @@ echo $config_json > /www/server/panel/config/api.json
 /etc/init.d/bt default
 # nginx mysql  ftp 安装
 
+
+# ftp 开启
 
 # docker pull 镜像
 
