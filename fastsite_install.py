@@ -2,6 +2,7 @@
 # 运行环境： python2
 # 安装 fastsite 到机器上
 # 目录准备
+from __future__ import print_function
 import os
 import subprocess
 import urllib2
@@ -161,8 +162,6 @@ class BTApi:
 
 #bt_api = BTApi("http://172.19.0.16:8888",'B3g0qV1sECiJmHAK03OCWz3fHEavbwKo')
 if __name__ == '__main__':
-    from __future__ import print_function
-
 
     def green_print(*msg):
         for _ in msg:
