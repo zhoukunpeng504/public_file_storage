@@ -213,7 +213,7 @@ if __name__ == '__main__':
     if not os.path.exists("/www"):
       os.system("ln -s /data/www /www")
     os.system("yum install -y epel-release")
-    os.system("yum install -y htop net-tools vim wget svn git gcc gcc-c++ initscripts bzip2 docker")
+    os.system("yum install -y htop net-tools vim wget svn git gcc gcc-c++ initscripts bzip2 docker lrzsz")
     green_print("yum依赖包安装完成")
     os.system("wget -O install.sh http://download.bt.cn/install/install_6.0.sh && echo y |sh install.sh")
     os.system("service docker start")
