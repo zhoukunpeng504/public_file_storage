@@ -289,9 +289,12 @@ if __name__ == '__main__':
     green_print("宝塔 mysql ftp设置完成")
 
     # 代码下载
-    os.system("cd /data/ && wget https://raw.githubusercontent.com/zhoukunpeng504/public_file_storage/master/fastsite.tar.bz2")
+    code_tar_name = 'fastsite-082601.tar.bz2'
+    os.system("cd /data/ && wget https://raw.githubusercontent.com/zhoukunpeng504/public_file_storage/master/\
+    fastsite_release/%s" % code_tar_name)
     # 解压代码
-    os.system("cd /data/ && tar -jxvf fastsite.tar.bz2")
+    os.system("cd /data/ && tar -jxvf %s" % code_tar_name)
+    os.system("rm -rf /data/%s" % code_tar_name)
     with open("/data/fastsite/config.ini", "w") as f:
         _config_content = '''[fastsite]
 # mysql 配置
