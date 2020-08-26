@@ -83,7 +83,7 @@ class BTApi:
 
 
     def reset_username(self,username):
-        url = self.__BT_PANEL + '/plugin?action=setUsername'
+        url = self.__BT_PANEL + '/config?action=setUsername'
         #准备POST数据
         p_data = self.__get_key_data()  #取签名
         p_data['username1'] = username
@@ -95,7 +95,7 @@ class BTApi:
 
 
     def reset_passwd(self, passwd):
-        url = self.__BT_PANEL + '/plugin?action=setPassword'
+        url = self.__BT_PANEL + '/config?action=setPassword'
         #准备POST数据
         p_data = self.__get_key_data()  #取签名
         p_data['password1'] = passwd
@@ -107,7 +107,7 @@ class BTApi:
 
 
     def set_admin_path(self, admin_path):
-        url = self.__BT_PANEL + '/plugin?action=set_admin_path'
+        url = self.__BT_PANEL + '/config?action=set_admin_path'
         #准备POST数据
         p_data = self.__get_key_data()  #取签名
         p_data['admin_path'] = admin_path
@@ -260,7 +260,7 @@ if __name__ == '__main__':
     # 等待安装完成
     while 1:
         result = bt_api.get_task_speed()
-        if result.get('status',None) == 'false':
+        if result.get('status', None) == False:
             green_print('宝塔插件( nginx mysql ftp )安装完成')
             break
         else:
@@ -268,10 +268,10 @@ if __name__ == '__main__':
                 msg = ''
                 for i in range(20):
                     msg += msg.join('.')
-                    a = "等待安装完成" + '{}'.format(msg)
+                    a = "请耐心等待安装完成" + '{}'.format(msg)
                     if i % 10 == 0:  # 到第几次重头开始
                         msg = ''
-                    print("%d\r" % i, end='')
+                    print("\r", end='')
                     sys.stdout.flush()
                     sys.stdout.write(a)
                     sys.stdout.flush()
