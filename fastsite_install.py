@@ -14,6 +14,23 @@ from urllib2 import Request, build_opener
 from urllib import urlencode, quote
 import sys
 
+panelPath = '/www/server/panel/'
+#os.chdir(panelPath)
+sys.path.append(panelPath + "class/")
+
+
+def set_panel_pwd(username,password):
+    import public, db
+    sql = db.Sql()
+    if len(username) < 3: return public.returnMsg(False, 'USER_USERNAME_LEN')
+    if len(password) < 5: return public.returnMsg(False, 'USER_PASSWORD_LEN')
+    # 修改用户名
+    public.M('users').where('id=?',(1,)).setField('username', username)
+    # 修改密码
+    sql.table('users').where('id=?',(1,)).setField('password',public.password_salt(public.md5(password),uid=1))
+    print("|-用户名: " + username)
+    print("|-新密码: " + password)
+    return public.returnMsg(True, '修改成功')
 
 
 class BTApi:
@@ -76,31 +93,7 @@ class BTApi:
         p_data['version'] = ver
         p_data['type'] = type
         #请求面板接口
-        print(p_data)
-        result = self.__http_post_cookie(url,p_data)
-        #解析JSON数据
-        return json.loads(result)
-
-
-    def reset_username(self,username):
-        url = self.__BT_PANEL + '/config?action=setUsername'
-        #准备POST数据
-        p_data = self.__get_key_data()  #取签名
-        p_data['username1'] = username
-        p_data['username2'] = username
-        #请求面板接口
-        result = self.__http_post_cookie(url,p_data)
-        #解析JSON数据
-        return json.loads(result)
-
-
-    def reset_passwd(self, passwd):
-        url = self.__BT_PANEL + '/config?action=setPassword'
-        #准备POST数据
-        p_data = self.__get_key_data()  #取签名
-        p_data['password1'] = passwd
-        p_data['password2'] = passwd
-        #请求面板接口
+        #print(p_data)
         result = self.__http_post_cookie(url,p_data)
         #解析JSON数据
         return json.loads(result)
@@ -219,17 +212,13 @@ if __name__ == '__main__':
     os.system("service docker start")
 
 
-    _p = subprocess.Popen('''ifconfig docker0|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"''',
-                          shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    _p.wait()
-    docker0_ip = _p.stdout.read().strip()
 
     _p = subprocess.Popen('''ifconfig -a|grep inet|grep -v inet6|awk '{print $2}'|tr -d "addr:"''',
                           shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     _p.wait()
     all_ip = _p.stdout.read().strip().split()
     all_ip = [i for i in all_ip if i]
-    all_ip = list(set(["127.0.0.1"] + [i for i in all_ip if i != docker0_ip]))
+    all_ip = list(set(["127.0.0.1"] + all_ip))
     config_json='{"open": true, "token": "abaaaf7c24c5fcc73fc394e208ebda03", "limit_addr": [%s], "binds": [{"time": 1597743896.5763838, "token": "mvRaBsOZumgBxeWkSv", "status": 0}], "apps": [], "key": "GVqlpFgeSSd9WQR6", "token_crypt": "B3g0qV1sECiJmHAK03OCWz3fHEavbwKo"}' % \
                 (", ".join(['"%s"'% i for i in all_ip]))
     with open("/www/server/panel/config/api.json", "w") as f:
@@ -241,27 +230,37 @@ if __name__ == '__main__':
         local_ip = i
 
     bt_url = "http://%s:8888" % local_ip
-    # os.system("/etc/init.d/bt default")
-    # os.system("")
     bt_key = 'B3g0qV1sECiJmHAK03OCWz3fHEavbwKo'
     bt_api = BTApi(bt_url, bt_key)
     # bt入口 用户 密码修改
     print(bt_api.set_admin_path("/fastsite_bt"))
-    print(bt_api.reset_username('fastsite'))
-    print(bt_api.reset_passwd(secret))
-    green_print('宝塔参数初始化完成')
-
+    #print(bt_api.reset_username('fastsite'))
+    #print(bt_api.reset_passwd(secret))
+    set_panel_pwd('fastsite', secret)
+    green_print("宝塔登录入口已重置为：%s/fastsite_bt" % bt_url)
+    green_print("宝塔登录用户已修改为：fastsite")
+    green_print("宝塔登录密码已修改为：%s" % secret)
+    green_print('宝塔基本参数初始化完成。')
+    time.sleep(2)
+    print("准备安装mysql nginx pureftpd...")
+    time.sleep(2)
     # nginx mysql  ftp 安装
     for i in ['nginx-1.18:1', 'mysql-5.6:1', 'pureftpd-1.0:0']:
         name,ver,_type = re.match("([^-]+)-([\d]+\.[\d]+):(\d)",i).groups()
-        _ = bt_api.install_plugin(name, ver, _type)
-        print(_)
+        for j in range(20):
+            time.sleep(3)
+            try:
+                _ = bt_api.install_plugin(name, ver, _type)
+                print(_)
+                break
+            except Exception as e:
+                print("Exception:",str(e))
 
     # 等待安装完成
     while 1:
         result = bt_api.get_task_speed()
         if result.get('status', None) == False:
-            green_print('宝塔插件( nginx mysql ftp )安装完成')
+            green_print('\n宝塔插件( nginx mysql ftp )安装完成')
             break
         else:
             def wait_():
